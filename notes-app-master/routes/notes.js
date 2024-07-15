@@ -42,6 +42,27 @@ router.post('/create', auth, async (req, res) => {
 
   });
 
+  router.post('/share', auth, async (req, res) => {
+
+    try {
+
+      const { noteId, userIds } = req.body;
+      const note = await Note.findById(noteId);
+
+      if (!note || !note.owner.equals(req.user._id)) {
+        return res.status(404).send({ error: 'Note not found or you do not have permission' });
+      }
+
+      note.sharedWith.push(...userIds);
+      await note.save();
+
+      res.send({ message: 'Note shared successfully' });
+    } 
+    catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   router.put('/:id', auth, async (req, res) => {
 
     try {
